@@ -1,7 +1,6 @@
 flask
 flask-cors
 gunicorn
-eventlet
 google-genai
 ddgs
 beautifulsoup4
