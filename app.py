@@ -4,6 +4,9 @@ Uses Google Gemini AI to research podcast guests and generate interview question
 Saves output as a local .docx file you can download directly from the browser.
 """
 
+import eventlet
+eventlet.monkey_patch()
+
 import os
 import json
 import time
