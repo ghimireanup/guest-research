@@ -35,15 +35,22 @@ load_dotenv()
 app = Flask(__name__, static_folder="static")
 CORS(app)
 
-# Configure Gemini client with the API key from .env
-gemini_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
-
-# Gemini model — 2.0 flash is fast and handles long research context well
+# Gemini model to use
 GEMINI_MODEL = "gemini-2.5-flash"
 
-# Folder where generated .docx files are saved
-DOCS_FOLDER = Path("generated_docs")
+# Use /tmp on cloud servers (writable), or a local folder in development
+DOCS_FOLDER = Path("/tmp/generated_docs") if os.getenv("RAILWAY_ENVIRONMENT") else Path("generated_docs")
 DOCS_FOLDER.mkdir(exist_ok=True)
+
+# Gemini client — initialised lazily so a missing key doesn't crash startup
+_gemini_client = None
+
+def get_gemini_client():
+    """Return a cached Gemini client, creating it on first call."""
+    global _gemini_client
+    if _gemini_client is None:
+        _gemini_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+    return _gemini_client
 
 # -------------------------------------------------------------------
 # In-memory session store
@@ -232,7 +239,7 @@ Based on what they haven't been asked about, or where past interviewers stayed s
 
 Write in plain, direct language. Be specific and insightful."""
 
-    response = gemini_client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+    response = get_gemini_client().models.generate_content(model=GEMINI_MODEL, contents=prompt)
     return response.text
 
 
@@ -273,7 +280,7 @@ Rules:
 
 After the questions, add a short "Interview Notes" section with 2-3 tactical tips for the interviewer based on what you know about this guest."""
 
-    response = gemini_client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+    response = get_gemini_client().models.generate_content(model=GEMINI_MODEL, contents=prompt)
     return response.text
 
 
