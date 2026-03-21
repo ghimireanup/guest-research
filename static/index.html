@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guest Research Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- ─────────────────────────────────────────────
+       Page header
+  ────────────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="container">
+      <div class="logo">🎙️</div>
+      <h1>Guest Research Agent</h1>
+      <p class="subtitle">AI-powered research and interview questions for podcast hosts</p>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ─── Search card ─────────────────────────── -->
+    <section class="card search-card">
+      <label for="guestInput" class="input-label">Guest Name</label>
+      <div class="input-row">
+        <input
+          id="guestInput"
+          type="text"
+          placeholder="e.g. Sara Blakely, Brian Chesky, Whitney Wolfe Herd…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="researchBtn" onclick="startResearch()">
+          Research Guest
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ─── Progress section — shown while researching ─── -->
+    <section id="progressSection" class="hidden" style="display:none">
+      <div class="progress-card">
+        <div class="steps-row">
+          <div class="step" id="step1">
+            <div class="step-dot"></div>
+            <span>Research</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" id="step2">
+            <div class="step-dot"></div>
+            <span>Interviews</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" id="step3">
+            <div class="step-dot"></div>
+            <span>Context</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" id="step4">
+            <div class="step-dot"></div>
+            <span>Questions</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" id="step5">
+            <div class="step-dot"></div>
+            <span>Saving</span>
+          </div>
+        </div>
+        <p id="statusText" class="status-text">Starting research…</p>
+      </div>
+    </section>
+
+    <!-- ─── Results — built up progressively ────── -->
+    <section id="resultsSection" class="hidden" style="display:none">
+
+      <!-- Guest Brief -->
+      <div id="briefSection" class="card result-card hidden">
+        <div class="card-header">
+          <span class="card-icon">📋</span>
+          <h2>Guest Brief</h2>
+        </div>
+        <div id="briefContent" class="markdown-body"></div>
+      </div>
+
+      <!-- Interview Questions -->
+      <div id="questionsSection" class="card result-card hidden">
+        <div class="card-header">
+          <span class="card-icon">❓</span>
+          <h2>Interview Questions</h2>
+        </div>
+        <div id="questionsContent" class="markdown-body"></div>
+      </div>
+
+      <!-- Google Doc link — shown after save -->
+      <div id="gdocSection" class="card gdoc-card hidden">
+        <span class="card-icon">📄</span>
+        <div>
+          <p class="gdoc-label">Word Document Ready</p>
+          <a id="gdocLink" href="#" class="gdoc-link">
+            Download .docx →
+          </a>
+        </div>
+      </div>
+
+      <!-- Error card -->
+      <div id="errorSection" class="card error-card hidden">
+        <span class="card-icon">⚠️</span>
+        <div>
+          <p class="error-title">Something went wrong</p>
+          <p id="errorText" class="error-message"></p>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
