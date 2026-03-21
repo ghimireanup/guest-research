@@ -96,8 +96,8 @@ async function pollStatus(sessionId, btn) {
         if (data.error) {
           showError(data.error);
         } else {
-          if (data.docx_filename) {
-            showDocxLink(data.docx_filename);
+          if (data.download_ready) {
+            showDocxLink(sessionId);  // pass session_id — download is generated on demand
             markStepDone(5);
           }
           setStatus("Research complete! ✓");
@@ -191,11 +191,11 @@ function renderSection(sectionId, contentId, markdownText) {
   section.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function showDocxLink(filename) {
+function showDocxLink(sessionId) {
   const section = document.getElementById("gdocSection");
   const link = document.getElementById("gdocLink");
-  link.href = `/api/download/${encodeURIComponent(filename)}`;
-  link.textContent = `Download ${filename} →`;
+  link.href = `/api/download/${sessionId}`;
+  link.textContent = "Download Word Document (.docx) →";
   section.classList.remove("hidden");
   section.classList.add("fade-in");
   section.scrollIntoView({ behavior: "smooth", block: "start" });

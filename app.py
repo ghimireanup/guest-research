@@ -11,8 +11,8 @@ import threading
 import uuid
 import re
 from datetime import datetime
-from pathlib import Path
 
+import io
 import requests
 from bs4 import BeautifulSoup
 from ddgs import DDGS
@@ -34,10 +34,6 @@ app = Flask(__name__, static_folder="static")
 CORS(app)
 
 GEMINI_MODEL = "gemini-2.5-flash"
-
-# Use /tmp on Railway (writable), local folder in development
-DOCS_FOLDER = Path("/tmp/generated_docs") if os.getenv("RAILWAY_ENVIRONMENT") else Path("generated_docs")
-DOCS_FOLDER.mkdir(exist_ok=True)
 
 # Lazy Gemini client — created on first use so a missing key won't crash startup
 _gemini_client = None
@@ -64,10 +60,11 @@ def new_session(guest_name: str) -> str:
         "guest_name": guest_name,
         "status": "Starting research...",
         "step": 0,
-        "sections": {},       # filled in as each section completes
+        "sections": {},   # filled in as each section completes
+        "brief": None,    # stored for docx generation on demand
+        "questions": None,
         "done": False,
         "error": None,
-        "docx_filename": None,
         "created_at": time.time(),
     }
     return session_id
@@ -227,10 +224,11 @@ End with an "Interview Notes" section: 2-3 tactical tips for the interviewer."""
 
 
 # -------------------------------------------------------------------
-# Save as local .docx
+# Build a .docx in memory and return bytes — no disk writes needed
 # -------------------------------------------------------------------
 
-def save_to_docx(guest_name: str, brief: str, questions: str) -> str:
+def build_docx_bytes(guest_name: str, brief: str, questions: str) -> bytes:
+    """Creates a Word document entirely in memory and returns raw bytes."""
     doc = Document()
     today = datetime.now().strftime("%B %d, %Y")
 
@@ -247,10 +245,10 @@ def save_to_docx(guest_name: str, brief: str, questions: str) -> str:
     doc.add_heading("INTERVIEW QUESTIONS", level=1)
     _add_markdown_to_doc(doc, questions)
 
-    safe = re.sub(r"[^\w\s-]", "", guest_name).strip().replace(" ", "_")
-    filename = f"Guest_Research_{safe}_{datetime.now().strftime('%Y-%m-%d')}.docx"
-    doc.save(DOCS_FOLDER / filename)
-    return filename
+    buf = io.BytesIO()
+    doc.save(buf)
+    buf.seek(0)
+    return buf.getvalue()
 
 
 def _add_markdown_to_doc(doc, text: str):
@@ -294,13 +292,11 @@ def run_research(session_id: str, guest_name: str):
 
         update_session(session_id, step=4, status="Generating 15 interview questions...")
         questions = generate_questions_with_gemini(guest_name, brief)
-        # Merge questions into existing sections dict
         research_sessions[session_id]["sections"]["questions"] = questions
 
-        update_session(session_id, step=5, status="Saving Word document...")
-        filename = save_to_docx(guest_name, brief, questions)
-
-        update_session(session_id, step=5, status="Done!", done=True, docx_filename=filename)
+        # Store brief and questions in session so /api/download can build the docx on demand
+        update_session(session_id, step=5, status="Done!", done=True,
+                       brief=brief, questions=questions)
 
     except Exception as e:
         print(f"[research] Error: {e}")
@@ -342,25 +338,32 @@ def get_status(session_id: str):
         return jsonify({"error": "Session not found"}), 404
 
     return jsonify({
-        "step":          sess["step"],
-        "status":        sess["status"],
-        "sections":      sess["sections"],
-        "done":          sess["done"],
-        "error":         sess["error"],
-        "docx_filename": sess["docx_filename"],
+        "step":     sess["step"],
+        "status":   sess["status"],
+        "sections": sess["sections"],
+        "done":     sess["done"],
+        "error":    sess["error"],
+        # Tell the frontend a download is ready once brief+questions are stored
+        "download_ready": sess["brief"] is not None and sess["questions"] is not None,
     })
 
 
-@app.route("/api/download/<filename>")
-def download_file(filename: str):
-    safe = Path(filename).name
-    filepath = DOCS_FOLDER / safe
-    if not filepath.exists():
-        return jsonify({"error": "File not found"}), 404
+@app.route("/api/download/<session_id>")
+def download_file(session_id: str):
+    """Generate the .docx in memory on demand and stream it to the browser."""
+    sess = research_sessions.get(session_id)
+    if not sess or not sess.get("brief") or not sess.get("questions"):
+        return jsonify({"error": "Research not ready or session expired"}), 404
+
+    docx_bytes = build_docx_bytes(sess["guest_name"], sess["brief"], sess["questions"])
+
+    safe = re.sub(r"[^\w\s-]", "", sess["guest_name"]).strip().replace(" ", "_")
+    filename = f"Guest_Research_{safe}_{datetime.now().strftime('%Y-%m-%d')}.docx"
+
     return send_file(
-        filepath,
+        io.BytesIO(docx_bytes),
         as_attachment=True,
-        download_name=safe,
+        download_name=filename,
         mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     )
 
