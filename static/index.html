@@ -3,122 +3,319 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Guest Research Agent</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/style.css" />
+  <title>DOERS | Guest Research Agent</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+
+  <!-- Fonts: Plus Jakarta Sans (headlines) + Inter (body) + Material Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "primary":                  "#af101a",
+            "primary-container":        "#d32f2f",
+            "on-primary":               "#ffffff",
+            "on-primary-container":     "#fff2f0",
+            "surface":                  "#fcf9f8",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low":    "#f6f3f2",
+            "surface-container":        "#f0eded",
+            "surface-container-high":   "#eae7e7",
+            "surface-container-highest":"#e5e2e1",
+            "on-surface":               "#1c1b1b",
+            "on-surface-variant":       "#5b403d",
+            "outline":                  "#8f6f6c",
+            "outline-variant":          "#e4beba",
+            "tertiary":                 "#005f7b",
+            "error":                    "#ba1a1a",
+          },
+          fontFamily: {
+            headline: ["Plus Jakarta Sans", "sans-serif"],
+            body:     ["Inter", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Material Icons rendering */
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* Glassmorphism */
+    .glass-effect {
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    /* Hidden utility — JS toggles this class */
+    .hidden { display: none !important; }
+
+    /* Fade-in animation for result cards */
+    .fade-in {
+      animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Progress step states */
+    .step-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #e5e2e1;
+      border: 2px solid #e4beba;
+      transition: all 0.3s ease;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step.active .step-dot {
+      background: #af101a;
+      border-color: #af101a;
+      box-shadow: 0 0 0 4px rgba(175,16,26,0.15);
+      animation: pulse 1.5s infinite;
+    }
+    .step.done .step-dot {
+      background: #af101a;
+      border-color: #af101a;
+    }
+    .step.done .step-dot::after {
+      content: "✓";
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .step-line {
+      flex: 1; height: 2px;
+      background: #e4beba;
+      transition: background 0.3s ease;
+    }
+    .step-line.done { background: #af101a; }
+    .step span {
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: #8f6f6c; margin-top: 6px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .step.active span, .step.done span { color: #af101a; }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(175,16,26,0.15); }
+      50%       { box-shadow: 0 0 0 8px rgba(175,16,26,0.08); }
+    }
+
+    /* Markdown content styles */
+    .markdown-body h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.15rem; font-weight: 800;
+      color: #1c1b1b; margin: 1.5rem 0 0.5rem;
+      text-transform: uppercase; letter-spacing: -0.01em;
+      border-left: 3px solid #af101a; padding-left: 0.75rem;
+    }
+    .markdown-body h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      color: #af101a; margin: 1.25rem 0 0.4rem;
+    }
+    .markdown-body p { color: #5b403d; line-height: 1.7; margin-bottom: 0.75rem; font-size: 0.92rem; }
+    .markdown-body ul { padding-left: 1.25rem; margin-bottom: 0.75rem; }
+    .markdown-body ol { padding-left: 1.25rem; margin-bottom: 0.75rem; }
+    .markdown-body li { color: #5b403d; font-size: 0.92rem; line-height: 1.7; margin-bottom: 0.3rem; }
+    .markdown-body strong { color: #1c1b1b; font-weight: 700; }
+  </style>
 </head>
-<body>
 
-  <!-- ─────────────────────────────────────────────
-       Page header
-  ────────────────────────────────────────────── -->
-  <header class="page-header">
-    <div class="container">
-      <div class="logo">🎙️</div>
-      <h1>Guest Research Agent</h1>
-      <p class="subtitle">AI-powered research and interview questions for podcast hosts</p>
+<body class="bg-surface font-body text-on-surface min-h-screen">
+
+  <!-- ── Top Navigation ───────────────────────────────────── -->
+  <nav class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-surface glass-effect border-b border-outline-variant/20">
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined text-primary text-2xl">mic</span>
+      <span class="text-xl font-headline font-extrabold text-primary tracking-tight uppercase">DOERS</span>
     </div>
-  </header>
+    <span class="hidden md:block text-xs font-headline font-bold uppercase tracking-widest text-on-surface-variant">Guest Research Agent</span>
+    <div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+      <span class="material-symbols-outlined text-primary text-lg">person</span>
+    </div>
+  </nav>
 
-  <main class="container">
+  <main class="pt-16">
 
-    <!-- ─── Search card ─────────────────────────── -->
-    <section class="card search-card">
-      <label for="guestInput" class="input-label">Guest Name</label>
-      <div class="input-row">
-        <input
-          id="guestInput"
-          type="text"
-          placeholder="e.g. Sara Blakely, Brian Chesky, Whitney Wolfe Herd…"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <button id="researchBtn" onclick="startResearch()">
-          Research Guest
-        </button>
+    <!-- ── Hero Banner ──────────────────────────────────────── -->
+    <section class="relative overflow-hidden bg-primary px-6 md:px-12 pt-16 pb-36">
+      <!-- Subtle geometric background -->
+      <div class="absolute inset-0 opacity-10 pointer-events-none">
+        <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M0 100 L100 0 L100 100 Z" fill="white"/>
+        </svg>
       </div>
-
+      <div class="relative z-10 max-w-2xl mx-auto md:mx-0">
+        <span class="inline-block bg-white/20 text-white text-[10px] font-headline font-bold uppercase tracking-widest px-3 py-1 rounded mb-4">AI-Powered Research</span>
+        <h1 class="text-4xl md:text-6xl font-headline font-extrabold tracking-tight leading-none uppercase text-white mb-4">
+          Research Your<br/><span class="text-on-primary-container">Next Guest</span>
+        </h1>
+        <p class="text-white/80 text-base md:text-lg max-w-md font-medium">
+          Deep background, past interviews, and 15 custom questions — in minutes.
+        </p>
+      </div>
     </section>
 
-    <!-- ─── Progress section — shown while researching ─── -->
-    <section id="progressSection" class="hidden" style="display:none">
-      <div class="progress-card">
-        <div class="steps-row">
-          <div class="step" id="step1">
+    <!-- ── Search Card (overlaps hero) ─────────────────────── -->
+    <section class="px-4 md:px-8 -mt-20 relative z-20 max-w-3xl mx-auto mb-12">
+      <div class="bg-surface-container-lowest glass-effect rounded-xl shadow-[0_4px_40px_rgba(0,0,0,0.08)] border border-outline-variant/20 p-6 md:p-10">
+
+        <label for="guestInput" class="block text-xs font-headline font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+          Guest Name
+        </label>
+        <div class="relative mb-6">
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary">person</span>
+          <input
+            id="guestInput"
+            type="text"
+            placeholder="e.g. Alex Hormozi, Sara Blakely, Brian Chesky…"
+            autocomplete="off"
+            spellcheck="false"
+            class="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary text-on-surface font-body placeholder:text-outline/50 text-sm transition-all outline-none"
+          />
+        </div>
+
+        <div class="flex justify-center">
+          <button
+            id="researchBtn"
+            onclick="startResearch()"
+            class="bg-primary text-on-primary font-headline font-extrabold px-10 py-4 rounded-lg flex items-center gap-3 hover:bg-primary-container hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20 uppercase tracking-tight text-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            <span class="material-symbols-outlined text-xl">search</span>
+            Research Guest
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Progress Section ─────────────────────────────────── -->
+    <section id="progressSection" class="hidden px-4 md:px-8 max-w-3xl mx-auto mb-8">
+      <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-6 md:p-8">
+
+        <!-- Step indicators -->
+        <div class="flex items-start justify-between mb-6">
+          <div class="step flex flex-col items-center gap-1" id="step1">
             <div class="step-dot"></div>
             <span>Research</span>
           </div>
-          <div class="step-line"></div>
-          <div class="step" id="step2">
+          <div class="step-line mt-4"></div>
+          <div class="step flex flex-col items-center gap-1" id="step2">
             <div class="step-dot"></div>
             <span>Interviews</span>
           </div>
-          <div class="step-line"></div>
-          <div class="step" id="step3">
+          <div class="step-line mt-4"></div>
+          <div class="step flex flex-col items-center gap-1" id="step3">
             <div class="step-dot"></div>
             <span>Context</span>
           </div>
-          <div class="step-line"></div>
-          <div class="step" id="step4">
+          <div class="step-line mt-4"></div>
+          <div class="step flex flex-col items-center gap-1" id="step4">
             <div class="step-dot"></div>
             <span>Questions</span>
           </div>
-          <div class="step-line"></div>
-          <div class="step" id="step5">
+          <div class="step-line mt-4"></div>
+          <div class="step flex flex-col items-center gap-1" id="step5">
             <div class="step-dot"></div>
             <span>Saving</span>
           </div>
         </div>
-        <p id="statusText" class="status-text">Starting research…</p>
+
+        <!-- Status text -->
+        <p id="statusText" class="text-center text-xs font-headline font-bold uppercase tracking-widest text-on-surface-variant">
+          Starting research…
+        </p>
       </div>
     </section>
 
-    <!-- ─── Results — built up progressively ────── -->
-    <section id="resultsSection" class="hidden" style="display:none">
+    <!-- ── Results Section ──────────────────────────────────── -->
+    <section id="resultsSection" class="hidden px-4 md:px-8 max-w-3xl mx-auto pb-24 space-y-6">
 
-      <!-- Guest Brief -->
-      <div id="briefSection" class="card result-card hidden">
-        <div class="card-header">
-          <span class="card-icon">📋</span>
-          <h2>Guest Brief</h2>
+      <!-- Guest Brief Card -->
+      <div id="briefSection" class="hidden bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-hidden">
+        <div class="flex items-center gap-3 px-6 md:px-8 py-4 bg-surface-container-low border-b border-outline-variant/20">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">description</span>
+          <h2 class="font-headline font-extrabold uppercase tracking-tight text-on-surface">Guest Brief</h2>
+          <span class="ml-auto text-[10px] font-headline font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-1 rounded">AI Generated</span>
         </div>
-        <div id="briefContent" class="markdown-body"></div>
+        <div id="briefContent" class="markdown-body px-6 md:px-8 py-6"></div>
       </div>
 
-      <!-- Interview Questions -->
-      <div id="questionsSection" class="card result-card hidden">
-        <div class="card-header">
-          <span class="card-icon">❓</span>
-          <h2>Interview Questions</h2>
+      <!-- Interview Questions Card -->
+      <div id="questionsSection" class="hidden bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-hidden">
+        <div class="flex items-center gap-3 px-6 md:px-8 py-4 bg-surface-container-low border-b border-outline-variant/20">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">quiz</span>
+          <h2 class="font-headline font-extrabold uppercase tracking-tight text-on-surface">15 Interview Questions</h2>
+          <span class="ml-auto text-[10px] font-headline font-bold uppercase tracking-widest text-tertiary bg-tertiary/10 px-2 py-1 rounded">Ready to Use</span>
         </div>
-        <div id="questionsContent" class="markdown-body"></div>
+        <div id="questionsContent" class="markdown-body px-6 md:px-8 py-6"></div>
       </div>
 
-      <!-- Google Doc link — shown after save -->
-      <div id="gdocSection" class="card gdoc-card hidden">
-        <span class="card-icon">📄</span>
-        <div>
-          <p class="gdoc-label">Word Document Ready</p>
-          <a id="gdocLink" href="#" class="gdoc-link">
+      <!-- Download Card -->
+      <div id="gdocSection" class="hidden bg-primary rounded-xl overflow-hidden">
+        <div class="relative overflow-hidden px-6 md:px-8 py-6 flex items-center justify-between gap-4">
+          <div class="absolute inset-0 opacity-10 pointer-events-none">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <path d="M0 100 L100 0 L100 100 Z" fill="white"/>
+            </svg>
+          </div>
+          <div class="relative z-10 flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+              <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings:'FILL' 1;">download</span>
+            </div>
+            <div>
+              <p class="text-white/70 text-[10px] font-headline font-bold uppercase tracking-widest mb-1">Research Complete</p>
+              <p class="text-white font-headline font-extrabold uppercase tracking-tight">Word Document Ready</p>
+            </div>
+          </div>
+          <a
+            id="gdocLink"
+            href="#"
+            class="relative z-10 bg-white text-primary font-headline font-extrabold text-xs uppercase tracking-tight px-6 py-3 rounded-lg hover:bg-on-primary-container transition-colors shadow-lg whitespace-nowrap"
+          >
             Download .docx →
           </a>
         </div>
       </div>
 
-      <!-- Error card -->
-      <div id="errorSection" class="card error-card hidden">
-        <span class="card-icon">⚠️</span>
-        <div>
-          <p class="error-title">Something went wrong</p>
-          <p id="errorText" class="error-message"></p>
+      <!-- Error Card -->
+      <div id="errorSection" class="hidden bg-surface-container-lowest rounded-xl border border-error/30 overflow-hidden">
+        <div class="flex items-center gap-3 px-6 md:px-8 py-4 bg-error/5 border-b border-error/20">
+          <span class="material-symbols-outlined text-error">error</span>
+          <h2 class="font-headline font-extrabold uppercase tracking-tight text-error">Something Went Wrong</h2>
         </div>
+        <p id="errorText" class="px-6 md:px-8 py-5 text-sm text-on-surface-variant"></p>
       </div>
 
     </section>
 
   </main>
+
+  <!-- ── Mobile Bottom Nav ────────────────────────────────── -->
+  <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 md:hidden bg-surface/80 glass-effect border-t border-outline-variant/20">
+    <a href="#" class="flex flex-col items-center gap-0.5 text-primary">
+      <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1;">search</span>
+      <span class="text-[9px] font-headline font-bold uppercase tracking-wider">Research</span>
+    </a>
+    <a href="#" class="flex flex-col items-center gap-0.5 text-outline">
+      <span class="material-symbols-outlined text-xl">history</span>
+      <span class="text-[9px] font-headline font-bold uppercase tracking-wider">History</span>
+    </a>
+    <a href="#" class="flex flex-col items-center gap-0.5 text-outline">
+      <span class="material-symbols-outlined text-xl">person</span>
+      <span class="text-[9px] font-headline font-bold uppercase tracking-wider">Profile</span>
+    </a>
+  </nav>
 
   <script src="/static/app.js"></script>
 </body>
