@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DOERS | Guest Research Agent</title>
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-
-  <!-- Fonts: Plus Jakarta Sans (headlines) + Inter (body) + Material Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
   <script>
@@ -26,11 +23,10 @@
             "surface-container-low":    "#f6f3f2",
             "surface-container":        "#f0eded",
             "surface-container-high":   "#eae7e7",
-            "surface-container-highest":"#e5e2e1",
-            "on-surface":               "#1c1b1b",
-            "on-surface-variant":       "#5b403d",
             "outline":                  "#8f6f6c",
             "outline-variant":          "#e4beba",
+            "on-surface":               "#1c1b1b",
+            "on-surface-variant":       "#5b403d",
             "tertiary":                 "#005f7b",
             "error":                    "#ba1a1a",
           },
@@ -44,276 +40,305 @@
   </script>
 
   <style>
-    /* Material Icons rendering */
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
-
-    /* Glassmorphism */
-    .glass-effect {
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-    }
-
-    /* Hidden utility — JS toggles this class */
     .hidden { display: none !important; }
 
-    /* Fade-in animation for result cards */
-    .fade-in {
-      animation: fadeUp 0.4s ease both;
-    }
+    /* Fade-in for result cards */
+    .fade-in { animation: fadeUp 0.45s cubic-bezier(0.22,1,0.36,1) both; }
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
+      from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Progress step states */
+    /* Glass */
+    .glass { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+
+    /* Progress dots */
     .step-dot {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: #e5e2e1;
-      border: 2px solid #e4beba;
-      transition: all 0.3s ease;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #eae7e7; border: 2px solid #e4beba;
       display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s ease;
     }
     .step.active .step-dot {
-      background: #af101a;
-      border-color: #af101a;
-      box-shadow: 0 0 0 4px rgba(175,16,26,0.15);
-      animation: pulse 1.5s infinite;
+      background: #af101a; border-color: #af101a;
+      box-shadow: 0 0 0 5px rgba(175,16,26,0.12);
+      animation: pulse-dot 1.4s infinite;
     }
-    .step.done .step-dot {
-      background: #af101a;
-      border-color: #af101a;
-    }
-    .step.done .step-dot::after {
-      content: "✓";
-      color: white;
-      font-size: 14px;
-      font-weight: 700;
-    }
-    .step-line {
-      flex: 1; height: 2px;
-      background: #e4beba;
-      transition: background 0.3s ease;
-    }
+    .step.done .step-dot { background: #af101a; border-color: #af101a; }
+    .step.done .step-dot::after { content: "✓"; color: #fff; font-size: 13px; font-weight: 800; }
+    .step-line { flex: 1; height: 2px; background: #e4beba; transition: background 0.3s; margin-top: 15px; }
     .step-line.done { background: #af101a; }
-    .step span {
-      font-size: 10px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.08em;
-      color: #8f6f6c; margin-top: 6px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+    .step-label {
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.09em; color: #8f6f6c; margin-top: 5px;
+      font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap;
     }
-    .step.active span, .step.done span { color: #af101a; }
-
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 4px rgba(175,16,26,0.15); }
-      50%       { box-shadow: 0 0 0 8px rgba(175,16,26,0.08); }
+    .step.active .step-label, .step.done .step-label { color: #af101a; }
+    @keyframes pulse-dot {
+      0%,100% { box-shadow: 0 0 0 5px rgba(175,16,26,0.12); }
+      50%      { box-shadow: 0 0 0 10px rgba(175,16,26,0.05); }
     }
 
-    /* Markdown content styles */
-    .markdown-body h2 {
+    /* Markdown content */
+    .md h2 {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.15rem; font-weight: 800;
-      color: #1c1b1b; margin: 1.5rem 0 0.5rem;
-      text-transform: uppercase; letter-spacing: -0.01em;
-      border-left: 3px solid #af101a; padding-left: 0.75rem;
+      font-size: 0.78rem; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #1c1b1b;
+      margin: 1.6rem 0 0.5rem;
+      border-left: 3px solid #af101a; padding-left: 0.65rem;
     }
-    .markdown-body h3 {
+    .md h3 {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1rem; font-weight: 700;
-      color: #af101a; margin: 1.25rem 0 0.4rem;
+      font-size: 0.88rem; font-weight: 800;
+      color: #af101a; margin: 1.2rem 0 0.35rem;
     }
-    .markdown-body p { color: #5b403d; line-height: 1.7; margin-bottom: 0.75rem; font-size: 0.92rem; }
-    .markdown-body ul { padding-left: 1.25rem; margin-bottom: 0.75rem; }
-    .markdown-body ol { padding-left: 1.25rem; margin-bottom: 0.75rem; }
-    .markdown-body li { color: #5b403d; font-size: 0.92rem; line-height: 1.7; margin-bottom: 0.3rem; }
-    .markdown-body strong { color: #1c1b1b; font-weight: 700; }
+    .md p  { color: #5b403d; line-height: 1.75; margin-bottom: 0.65rem; font-size: 0.875rem; }
+    .md ul { padding-left: 1.2rem; margin-bottom: 0.65rem; }
+    .md ol { padding-left: 1.2rem; margin-bottom: 0.65rem; }
+    .md li { color: #5b403d; font-size: 0.875rem; line-height: 1.7; margin-bottom: 0.3rem; }
+    .md strong { color: #1c1b1b; font-weight: 700; }
+
+    /* Image gallery scroll */
+    .img-strip { scrollbar-width: none; }
+    .img-strip::-webkit-scrollbar { display: none; }
+
+    /* Link row */
+    .link-row input:focus { outline: none; ring-color: #af101a; }
+
+    /* Textarea resize */
+    textarea { resize: vertical; }
+
+    /* Input base style */
+    .field-input {
+      width: 100%; background: #f6f3f2; border: none;
+      border-radius: 10px; padding: 14px 16px;
+      font-family: 'Inter', sans-serif; font-size: 0.875rem;
+      color: #1c1b1b; transition: box-shadow 0.2s;
+    }
+    .field-input:focus { outline: none; box-shadow: 0 0 0 2px #af101a; }
+    .field-input::placeholder { color: #b09d9b; }
   </style>
 </head>
 
 <body class="bg-surface font-body text-on-surface min-h-screen">
 
-  <!-- ── Top Navigation ───────────────────────────────────── -->
-  <nav class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-surface glass-effect border-b border-outline-variant/20">
-    <div class="flex items-center gap-3">
-      <span class="material-symbols-outlined text-primary text-2xl">mic</span>
-      <span class="text-xl font-headline font-extrabold text-primary tracking-tight uppercase">DOERS</span>
+  <!-- ── Nav ──────────────────────────────────────────────── -->
+  <nav class="fixed top-0 w-full z-50 h-14 px-5 flex items-center justify-between bg-surface/90 glass border-b border-outline-variant/20">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings:'FILL' 1;">mic</span>
+      <span class="font-headline font-black text-lg uppercase tracking-tight text-primary">DOERS</span>
     </div>
-    <span class="hidden md:block text-xs font-headline font-bold uppercase tracking-widest text-on-surface-variant">Guest Research Agent</span>
-    <div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-      <span class="material-symbols-outlined text-primary text-lg">person</span>
+    <span class="hidden md:block text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Guest Research Agent</span>
+    <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+      <span class="material-symbols-outlined text-primary text-base">person</span>
     </div>
   </nav>
 
-  <main class="pt-16">
+  <main class="pt-14">
 
-    <!-- ── Hero Banner ──────────────────────────────────────── -->
-    <section class="relative overflow-hidden bg-primary px-6 md:px-12 pt-16 pb-36">
-      <!-- Subtle geometric background -->
-      <div class="absolute inset-0 opacity-10 pointer-events-none">
-        <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <path d="M0 100 L100 0 L100 100 Z" fill="white"/>
+    <!-- ── Hero ─────────────────────────────────────────────── -->
+    <section class="relative overflow-hidden bg-primary px-6 md:px-12 pt-14 pb-40">
+      <div class="absolute inset-0 pointer-events-none opacity-[0.07]">
+        <svg viewBox="0 0 800 400" class="w-full h-full" preserveAspectRatio="none">
+          <circle cx="700" cy="-50" r="300" fill="white"/>
+          <circle cx="100" cy="420" r="220" fill="white"/>
         </svg>
       </div>
-      <div class="relative z-10 max-w-2xl mx-auto md:mx-0">
-        <span class="inline-block bg-white/20 text-white text-[10px] font-headline font-bold uppercase tracking-widest px-3 py-1 rounded mb-4">AI-Powered Research</span>
-        <h1 class="text-4xl md:text-6xl font-headline font-extrabold tracking-tight leading-none uppercase text-white mb-4">
-          Research Your<br/><span class="text-on-primary-container">Next Guest</span>
+      <div class="relative z-10 max-w-xl">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="inline-block bg-white/20 text-white text-[9px] font-headline font-black uppercase tracking-widest px-2.5 py-1 rounded">AI-Powered</span>
+          <span class="inline-block bg-white/10 text-white/80 text-[9px] font-headline font-bold uppercase tracking-widest px-2.5 py-1 rounded">Gemini 2.5</span>
+        </div>
+        <h1 class="text-[2.6rem] md:text-6xl font-headline font-black uppercase leading-[0.92] tracking-tight text-white mb-4">
+          Find Your<br/><span class="text-on-primary-container">Next Big<br/>Guest</span>
         </h1>
-        <p class="text-white/80 text-base md:text-lg max-w-md font-medium">
-          Deep background, past interviews, and 15 custom questions — in minutes.
+        <p class="text-white/70 text-sm md:text-base font-medium max-w-sm">
+          Deep background research, past interviews, gaps analysis, and 15 custom questions — in minutes.
         </p>
       </div>
     </section>
 
-    <!-- ── Search Card (overlaps hero) ─────────────────────── -->
-    <section class="px-4 md:px-8 -mt-20 relative z-20 max-w-3xl mx-auto mb-12">
-      <div class="bg-surface-container-lowest glass-effect rounded-xl shadow-[0_4px_40px_rgba(0,0,0,0.08)] border border-outline-variant/20 p-6 md:p-10">
+    <!-- ── Search Card ──────────────────────────────────────── -->
+    <section class="px-4 md:px-8 -mt-24 relative z-20 max-w-3xl mx-auto mb-10">
+      <div class="bg-surface-container-lowest rounded-2xl shadow-[0_8px_48px_rgba(0,0,0,0.10)] border border-outline-variant/20 p-6 md:p-9">
 
-        <label for="guestInput" class="block text-xs font-headline font-bold uppercase tracking-widest text-on-surface-variant mb-2">
-          Guest Name
-        </label>
-        <div class="relative mb-6">
-          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary">person</span>
+        <!-- Guest Name -->
+        <label class="block text-[9px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-2">Guest Name *</label>
+        <div class="relative mb-5">
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary text-xl">person</span>
           <input
             id="guestInput"
             type="text"
             placeholder="e.g. Alex Hormozi, Sara Blakely, Brian Chesky…"
-            autocomplete="off"
-            spellcheck="false"
-            class="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary text-on-surface font-body placeholder:text-outline/50 text-sm transition-all outline-none"
+            autocomplete="off" spellcheck="false"
+            class="field-input pl-12"
           />
         </div>
 
+        <!-- Links section -->
+        <label class="block text-[9px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-1">
+          Reference Links
+          <span class="font-medium normal-case tracking-normal text-outline ml-1">(LinkedIn, Wikipedia, personal site… helps us find the right person)</span>
+        </label>
+        <div id="linksContainer" class="space-y-2.5 mb-3">
+          <div class="link-row flex items-center gap-2">
+            <div class="relative flex-1">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-base">link</span>
+              <input type="url" placeholder="https://linkedin.com/in/…" class="field-input pl-9 text-xs" />
+            </div>
+            <button onclick="addLinkRow()" class="shrink-0 w-8 h-9 rounded-lg bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors" title="Add another link">
+              <span class="material-symbols-outlined text-on-surface-variant text-base">add</span>
+            </button>
+          </div>
+        </div>
+        <button onclick="addLinkRow()" class="text-[10px] font-headline font-bold uppercase tracking-widest text-primary hover:text-primary-container flex items-center gap-1 mb-6 transition-colors">
+          <span class="material-symbols-outlined text-sm">add_circle</span> Add another link
+        </button>
+
+        <!-- Research Context -->
+        <label class="block text-[9px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-1">
+          Research Context
+          <span class="font-medium normal-case tracking-normal text-outline ml-1">(optional — tell us what you're looking for)</span>
+        </label>
+        <div class="relative mb-6">
+          <span class="material-symbols-outlined absolute left-3 top-3.5 text-primary text-xl">chat</span>
+          <textarea
+            id="contextInput"
+            rows="3"
+            placeholder="e.g. I host a tech startup podcast. I want to focus on his early failures and fundraising journey. My audience loves contrarian views on venture capital."
+            class="field-input pl-10 pt-3 leading-relaxed"
+          ></textarea>
+        </div>
+
+        <!-- Submit -->
         <div class="flex justify-center">
           <button
             id="researchBtn"
             onclick="startResearch()"
-            class="bg-primary text-on-primary font-headline font-extrabold px-10 py-4 rounded-lg flex items-center gap-3 hover:bg-primary-container hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20 uppercase tracking-tight text-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+            class="bg-primary text-white font-headline font-black px-10 py-4 rounded-xl flex items-center gap-3 hover:bg-primary-container hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/25 uppercase tracking-tight text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-            <span class="material-symbols-outlined text-xl">search</span>
+            <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1;">search</span>
             Research Guest
           </button>
         </div>
+
       </div>
     </section>
 
-    <!-- ── Progress Section ─────────────────────────────────── -->
-    <section id="progressSection" class="hidden px-4 md:px-8 max-w-3xl mx-auto mb-8">
-      <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-6 md:p-8">
-
-        <!-- Step indicators -->
-        <div class="flex items-start justify-between mb-6">
-          <div class="step flex flex-col items-center gap-1" id="step1">
+    <!-- ── Progress ─────────────────────────────────────────── -->
+    <section id="progressSection" class="hidden px-4 md:px-8 max-w-3xl mx-auto mb-7">
+      <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-6 md:p-8">
+        <div class="flex items-start justify-between mb-5 px-2">
+          <div class="step flex flex-col items-center" id="step1">
             <div class="step-dot"></div>
-            <span>Research</span>
+            <span class="step-label mt-1.5">Research</span>
           </div>
-          <div class="step-line mt-4"></div>
-          <div class="step flex flex-col items-center gap-1" id="step2">
+          <div class="step-line"></div>
+          <div class="step flex flex-col items-center" id="step2">
             <div class="step-dot"></div>
-            <span>Interviews</span>
+            <span class="step-label mt-1.5">Interviews</span>
           </div>
-          <div class="step-line mt-4"></div>
-          <div class="step flex flex-col items-center gap-1" id="step3">
+          <div class="step-line"></div>
+          <div class="step flex flex-col items-center" id="step3">
             <div class="step-dot"></div>
-            <span>Context</span>
+            <span class="step-label mt-1.5">Brief</span>
           </div>
-          <div class="step-line mt-4"></div>
-          <div class="step flex flex-col items-center gap-1" id="step4">
+          <div class="step-line"></div>
+          <div class="step flex flex-col items-center" id="step4">
             <div class="step-dot"></div>
-            <span>Questions</span>
+            <span class="step-label mt-1.5">Questions</span>
           </div>
-          <div class="step-line mt-4"></div>
-          <div class="step flex flex-col items-center gap-1" id="step5">
+          <div class="step-line"></div>
+          <div class="step flex flex-col items-center" id="step5">
             <div class="step-dot"></div>
-            <span>Saving</span>
+            <span class="step-label mt-1.5">Done</span>
           </div>
         </div>
-
-        <!-- Status text -->
-        <p id="statusText" class="text-center text-xs font-headline font-bold uppercase tracking-widest text-on-surface-variant">
-          Starting research…
-        </p>
+        <p id="statusText" class="text-center text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Starting…</p>
       </div>
     </section>
 
-    <!-- ── Results Section ──────────────────────────────────── -->
-    <section id="resultsSection" class="hidden px-4 md:px-8 max-w-3xl mx-auto pb-24 space-y-6">
+    <!-- ── Results ───────────────────────────────────────────── -->
+    <section id="resultsSection" class="hidden px-4 md:px-8 max-w-3xl mx-auto pb-28 space-y-5">
 
-      <!-- Guest Brief Card -->
-      <div id="briefSection" class="hidden bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-hidden">
+      <!-- Photo gallery — populated by JS when images arrive -->
+      <div id="imageSection" class="hidden">
+        <p class="text-[9px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-3">Photos Found</p>
+        <div id="imageStrip" class="img-strip flex gap-3 overflow-x-auto pb-1"></div>
+      </div>
+
+      <!-- Guest Brief -->
+      <div id="briefSection" class="hidden bg-surface-container-lowest rounded-2xl border border-outline-variant/20 overflow-hidden">
         <div class="flex items-center gap-3 px-6 md:px-8 py-4 bg-surface-container-low border-b border-outline-variant/20">
           <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">description</span>
-          <h2 class="font-headline font-extrabold uppercase tracking-tight text-on-surface">Guest Brief</h2>
-          <span class="ml-auto text-[10px] font-headline font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-1 rounded">AI Generated</span>
+          <h2 class="font-headline font-black uppercase tracking-tight text-on-surface text-sm">Guest Brief</h2>
+          <span class="ml-auto text-[9px] font-headline font-black uppercase tracking-widest text-primary bg-primary/10 px-2.5 py-1 rounded-full">AI Generated</span>
         </div>
-        <div id="briefContent" class="markdown-body px-6 md:px-8 py-6"></div>
+        <div id="briefContent" class="md px-6 md:px-8 py-6"></div>
       </div>
 
-      <!-- Interview Questions Card -->
-      <div id="questionsSection" class="hidden bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-hidden">
+      <!-- Interview Questions -->
+      <div id="questionsSection" class="hidden bg-surface-container-lowest rounded-2xl border border-outline-variant/20 overflow-hidden">
         <div class="flex items-center gap-3 px-6 md:px-8 py-4 bg-surface-container-low border-b border-outline-variant/20">
           <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">quiz</span>
-          <h2 class="font-headline font-extrabold uppercase tracking-tight text-on-surface">15 Interview Questions</h2>
-          <span class="ml-auto text-[10px] font-headline font-bold uppercase tracking-widest text-tertiary bg-tertiary/10 px-2 py-1 rounded">Ready to Use</span>
+          <h2 class="font-headline font-black uppercase tracking-tight text-on-surface text-sm">15 Interview Questions</h2>
+          <span class="ml-auto text-[9px] font-headline font-black uppercase tracking-widest text-tertiary bg-tertiary/10 px-2.5 py-1 rounded-full">Ready to Use</span>
         </div>
-        <div id="questionsContent" class="markdown-body px-6 md:px-8 py-6"></div>
+        <div id="questionsContent" class="md px-6 md:px-8 py-6"></div>
       </div>
 
-      <!-- Download Card -->
-      <div id="gdocSection" class="hidden bg-primary rounded-xl overflow-hidden">
-        <div class="relative overflow-hidden px-6 md:px-8 py-6 flex items-center justify-between gap-4">
-          <div class="absolute inset-0 opacity-10 pointer-events-none">
-            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path d="M0 100 L100 0 L100 100 Z" fill="white"/>
+      <!-- Download -->
+      <div id="gdocSection" class="hidden bg-primary rounded-2xl overflow-hidden">
+        <div class="relative overflow-hidden px-6 md:px-8 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="absolute inset-0 pointer-events-none opacity-[0.07]">
+            <svg viewBox="0 0 400 200" class="w-full h-full" preserveAspectRatio="none">
+              <circle cx="380" cy="-30" r="200" fill="white"/>
             </svg>
           </div>
           <div class="relative z-10 flex items-center gap-4">
-            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+            <div class="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
               <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings:'FILL' 1;">download</span>
             </div>
             <div>
-              <p class="text-white/70 text-[10px] font-headline font-bold uppercase tracking-widest mb-1">Research Complete</p>
-              <p class="text-white font-headline font-extrabold uppercase tracking-tight">Word Document Ready</p>
+              <p class="text-white/60 text-[9px] font-headline font-bold uppercase tracking-widest mb-0.5">Research Complete</p>
+              <p class="text-white font-headline font-black uppercase tracking-tight text-sm">Word Document Ready</p>
             </div>
           </div>
-          <a
-            id="gdocLink"
-            href="#"
-            class="relative z-10 bg-white text-primary font-headline font-extrabold text-xs uppercase tracking-tight px-6 py-3 rounded-lg hover:bg-on-primary-container transition-colors shadow-lg whitespace-nowrap"
-          >
+          <a id="gdocLink" href="#"
+            class="relative z-10 bg-white text-primary font-headline font-black text-[10px] uppercase tracking-tight px-6 py-3 rounded-xl hover:bg-on-primary-container transition-colors shadow-lg whitespace-nowrap">
             Download .docx →
           </a>
         </div>
       </div>
 
-      <!-- Error Card -->
-      <div id="errorSection" class="hidden bg-surface-container-lowest rounded-xl border border-error/30 overflow-hidden">
+      <!-- Error -->
+      <div id="errorSection" class="hidden bg-surface-container-lowest rounded-2xl border border-error/30 overflow-hidden">
         <div class="flex items-center gap-3 px-6 md:px-8 py-4 bg-error/5 border-b border-error/20">
           <span class="material-symbols-outlined text-error">error</span>
-          <h2 class="font-headline font-extrabold uppercase tracking-tight text-error">Something Went Wrong</h2>
+          <h2 class="font-headline font-black uppercase tracking-tight text-error text-sm">Something Went Wrong</h2>
         </div>
         <p id="errorText" class="px-6 md:px-8 py-5 text-sm text-on-surface-variant"></p>
       </div>
 
     </section>
-
   </main>
 
-  <!-- ── Mobile Bottom Nav ────────────────────────────────── -->
-  <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 md:hidden bg-surface/80 glass-effect border-t border-outline-variant/20">
+  <!-- ── Mobile bottom nav ────────────────────────────────── -->
+  <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-14 md:hidden bg-surface/90 glass border-t border-outline-variant/20">
     <a href="#" class="flex flex-col items-center gap-0.5 text-primary">
       <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1;">search</span>
-      <span class="text-[9px] font-headline font-bold uppercase tracking-wider">Research</span>
+      <span class="text-[8px] font-headline font-bold uppercase tracking-wider">Research</span>
     </a>
     <a href="#" class="flex flex-col items-center gap-0.5 text-outline">
       <span class="material-symbols-outlined text-xl">history</span>
-      <span class="text-[9px] font-headline font-bold uppercase tracking-wider">History</span>
+      <span class="text-[8px] font-headline font-bold uppercase tracking-wider">History</span>
     </a>
     <a href="#" class="flex flex-col items-center gap-0.5 text-outline">
       <span class="material-symbols-outlined text-xl">person</span>
-      <span class="text-[9px] font-headline font-bold uppercase tracking-wider">Profile</span>
+      <span class="text-[8px] font-headline font-bold uppercase tracking-wider">Profile</span>
     </a>
   </nav>
 
