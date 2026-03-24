@@ -139,31 +139,48 @@
 
   <main class="pt-14">
 
-    <!-- ── Hero ─────────────────────────────────────────────── -->
-    <section class="relative overflow-hidden bg-primary px-6 md:px-12 pt-14 pb-40">
+    <!-- ── Hero + Search Card side by side ──────────────────── -->
+    <section class="relative overflow-hidden bg-primary px-6 md:px-12 pt-10 pb-12">
       <div class="absolute inset-0 pointer-events-none opacity-[0.07]">
         <svg viewBox="0 0 800 400" class="w-full h-full" preserveAspectRatio="none">
           <circle cx="700" cy="-50" r="300" fill="white"/>
           <circle cx="100" cy="420" r="220" fill="white"/>
         </svg>
       </div>
-      <div class="relative z-10 max-w-xl">
-        <div class="flex items-center gap-2 mb-4">
-          <span class="inline-block bg-white/20 text-white text-[9px] font-headline font-black uppercase tracking-widest px-2.5 py-1 rounded">AI-Powered</span>
-          <span class="inline-block bg-white/10 text-white/80 text-[9px] font-headline font-bold uppercase tracking-widest px-2.5 py-1 rounded">Gemini 2.5</span>
-        </div>
-        <h1 class="text-[2.6rem] md:text-6xl font-headline font-black uppercase leading-[0.92] tracking-tight text-white mb-4">
-          Find Your<br/><span class="text-on-primary-container">Next Big<br/>Guest</span>
-        </h1>
-        <p class="text-white/70 text-sm md:text-base font-medium max-w-sm">
-          Deep background research, past interviews, gaps analysis, and 15 custom questions — in minutes.
-        </p>
-      </div>
-    </section>
 
-    <!-- ── Search Card ──────────────────────────────────────── -->
-    <section class="px-4 md:px-8 -mt-24 relative z-20 max-w-3xl mx-auto mb-10">
-      <div class="bg-surface-container-lowest rounded-2xl shadow-[0_8px_48px_rgba(0,0,0,0.10)] border border-outline-variant/20 p-6 md:p-9">
+      <div class="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+
+        <!-- Left: headline text -->
+        <div class="lg:w-5/12 shrink-0 text-center lg:text-left">
+          <div class="flex items-center justify-center lg:justify-start gap-2 mb-4">
+            <span class="inline-block bg-white/20 text-white text-[9px] font-headline font-black uppercase tracking-widest px-2.5 py-1 rounded">AI-Powered</span>
+            <span class="inline-block bg-white/10 text-white/80 text-[9px] font-headline font-bold uppercase tracking-widest px-2.5 py-1 rounded">Gemini 2.5</span>
+          </div>
+          <h1 class="text-[2.8rem] md:text-6xl lg:text-7xl font-headline font-black uppercase leading-[0.88] tracking-tight text-white mb-5">
+            Find Your<br/><span class="text-on-primary-container">Next Big<br/>Guest</span>
+          </h1>
+          <p class="text-white/70 text-sm md:text-base font-medium max-w-xs mx-auto lg:mx-0">
+            Deep background, past interviews, gap analysis, and 15 custom questions — in minutes.
+          </p>
+          <div class="hidden lg:flex flex-col gap-3 mt-8">
+            <div class="flex items-center gap-3 text-white/80 text-xs font-medium">
+              <span class="material-symbols-outlined text-base text-on-primary-container" style="font-variation-settings:'FILL' 1;">check_circle</span>
+              Scrapes your reference links first
+            </div>
+            <div class="flex items-center gap-3 text-white/80 text-xs font-medium">
+              <span class="material-symbols-outlined text-base text-on-primary-container" style="font-variation-settings:'FILL' 1;">check_circle</span>
+              Finds all past interviews automatically
+            </div>
+            <div class="flex items-center gap-3 text-white/80 text-xs font-medium">
+              <span class="material-symbols-outlined text-base text-on-primary-container" style="font-variation-settings:'FILL' 1;">check_circle</span>
+              15 questions no one has asked before
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: search card -->
+        <div class="w-full lg:w-7/12">
+      <div class="bg-surface-container-lowest rounded-2xl shadow-[0_8px_48px_rgba(0,0,0,0.18)] border border-outline-variant/20 p-6 md:p-9">
 
         <!-- Guest Name -->
         <label class="block text-[9px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-2">Guest Name *</label>
@@ -225,7 +242,9 @@
           </button>
         </div>
 
-      </div>
+        </div><!-- end card -->
+        </div><!-- end right col -->
+      </div><!-- end flex row -->
     </section>
 
     <!-- ── Progress ─────────────────────────────────────────── -->
