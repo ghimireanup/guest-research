@@ -117,16 +117,23 @@ async function pollStatus(sessionId, btn) {
         _renderedImageCount = data.images.length;
       }
 
+      // Industry context — render once when available
+      if (data.industry_content && Object.keys(data.industry_content).length > 0 && !_renderedSections.has("industry")) {
+        _renderedSections.add("industry");
+        renderIndustrySection(data.industry_content);
+        markStepDone(3);
+      }
+
       // Render sections as they arrive — only once each
       if (data.sections?.brief && !_renderedSections.has("brief")) {
         _renderedSections.add("brief");
         renderSection("briefSection", "briefContent", data.sections.brief);
-        markStepDone(3);
+        markStepDone(4);
       }
       if (data.sections?.questions && !_renderedSections.has("questions")) {
         _renderedSections.add("questions");
         renderSection("questionsSection", "questionsContent", data.sections.questions);
-        markStepDone(4);
+        markStepDone(5);
       }
 
       if (data.done) {
@@ -136,7 +143,7 @@ async function pollStatus(sessionId, btn) {
         } else {
           if (data.download_ready) {
             showDocxLink(sessionId);
-            markStepDone(5);
+            markStepDone(6);
           }
           setStatus("Research complete ✓");
         }
@@ -198,7 +205,7 @@ function renderImages(imageUrls) {
 // Progress step helpers
 // ─────────────────────────────────────────────────────────────────
 
-const STEP_IDS = ["step1", "step2", "step3", "step4", "step5"];
+const STEP_IDS = ["step1", "step2", "step3", "step4", "step5", "step6"];
 
 function activateStep(n) {
   STEP_IDS.forEach((id, i) => {
@@ -270,6 +277,99 @@ function renderSection(sectionId, contentId, markdown) {
   section.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+// ─────────────────────────────────────────────────────────────────
+// Industry Context renderer — tabbed panels per category
+// ─────────────────────────────────────────────────────────────────
+
+function renderIndustrySection(industryContent) {
+  const tabs   = document.getElementById("categoryTabs");
+  const panels = document.getElementById("categoryPanels");
+  tabs.innerHTML   = "";
+  panels.innerHTML = "";
+
+  const entries = Object.entries(industryContent);
+  if (entries.length === 0) return;
+
+  const ACTIVE_CLS  = "bg-primary text-white font-headline font-black text-xs px-4 py-2 rounded-full whitespace-nowrap cursor-pointer transition-colors";
+  const INACTIVE_CLS = "bg-surface-container text-on-surface-variant font-headline font-bold text-xs px-4 py-2 rounded-full whitespace-nowrap hover:bg-surface-container-high cursor-pointer transition-colors";
+
+  const TF_CLASSES = {
+    past:    "text-[8px] font-bold uppercase tracking-widest bg-surface-container text-outline px-2 py-0.5 rounded-full",
+    present: "text-[8px] font-bold uppercase tracking-widest bg-green-50 text-green-700 px-2 py-0.5 rounded-full",
+    future:  "text-[8px] font-bold uppercase tracking-widest bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full",
+  };
+
+  entries.forEach(([catId, data], idx) => {
+    // Tab button
+    const tabBtn = document.createElement("button");
+    tabBtn.textContent = data.label || catId;
+    tabBtn.className = idx === 0 ? ACTIVE_CLS : INACTIVE_CLS;
+    tabBtn.dataset.target = "panel_" + catId;
+    tabBtn.addEventListener("click", () => {
+      tabs.querySelectorAll("button").forEach(b => b.className = INACTIVE_CLS);
+      tabBtn.className = ACTIVE_CLS;
+      panels.querySelectorAll(".cat-panel").forEach(p => p.classList.add("hidden"));
+      document.getElementById("panel_" + catId).classList.remove("hidden");
+    });
+    tabs.appendChild(tabBtn);
+
+    // Panel
+    const panel = document.createElement("div");
+    panel.id = "panel_" + catId;
+    panel.className = "cat-panel" + (idx === 0 ? "" : " hidden");
+
+    // Articles sub-section
+    panel.innerHTML += `<p class="flex items-center gap-1.5 text-[9px] font-headline font-black uppercase tracking-widest text-on-surface-variant mb-3 mt-1">
+      <span class="material-symbols-outlined text-sm">article</span> Top Articles</p>`;
+
+    if (data.articles && data.articles.length > 0) {
+      data.articles.forEach(a => {
+        const tf = a.timeframe || "present";
+        panel.innerHTML += `<a href="${escHtml(a.url)}" target="_blank" rel="noopener"
+          class="block p-3 rounded-xl border border-outline-variant/20 hover:bg-surface-container-low transition-colors mb-2 relative">
+          <span class="absolute top-2 right-2 ${TF_CLASSES[tf] || TF_CLASSES.present}">${tf}</span>
+          <p class="font-headline font-bold text-xs text-on-surface line-clamp-2 pr-12 mb-1">${escHtml(a.title)}</p>
+          <p class="text-xs text-on-surface-variant line-clamp-3 leading-relaxed">${escHtml(a.snippet)}</p>
+        </a>`;
+      });
+    } else {
+      panel.innerHTML += `<p class="text-xs text-outline italic">No articles found for this category</p>`;
+    }
+
+    // Videos sub-section
+    panel.innerHTML += `<p class="flex items-center gap-1.5 text-[9px] font-headline font-black uppercase tracking-widest text-primary mb-3 mt-5">
+      <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">play_circle</span> Top YouTube Videos</p>`;
+
+    if (data.videos && data.videos.length > 0) {
+      data.videos.forEach(v => {
+        const tf = v.timeframe || "present";
+        panel.innerHTML += `<a href="${escHtml(v.url)}" target="_blank" rel="noopener"
+          class="block p-3 rounded-xl border-l-2 border-l-red-500 border border-outline-variant/20 hover:bg-surface-container-low transition-colors mb-2 relative">
+          <span class="absolute top-2 right-2 ${TF_CLASSES[tf] || TF_CLASSES.present}">${tf}</span>
+          <p class="font-headline font-bold text-xs text-on-surface line-clamp-2 pr-12 mb-1"><span class="text-red-500 mr-1">▶</span>${escHtml(v.title)}</p>
+          <p class="text-xs text-on-surface-variant line-clamp-3 leading-relaxed">${escHtml(v.snippet)}</p>
+        </a>`;
+      });
+    } else {
+      panel.innerHTML += `<p class="text-xs text-outline italic">No videos found for this category</p>`;
+    }
+
+    panels.appendChild(panel);
+  });
+
+  const section = document.getElementById("industrySection");
+  section.classList.remove("hidden");
+  section.classList.add("fade-in");
+  section.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// HTML-escape helper
+function escHtml(str) {
+  if (!str) return "";
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+
 function showDocxLink(sessionId) {
   const section = document.getElementById("gdocSection");
   document.getElementById("gdocLink").href = `/api/download/${sessionId}`;
@@ -298,7 +398,7 @@ function resetUI() {
   _renderedSections.clear();
   _renderedImageCount = 0;
 
-  ["progressSection","resultsSection","briefSection","questionsSection",
+  ["progressSection","resultsSection","industrySection","briefSection","questionsSection",
    "gdocSection","errorSection","imageSection"].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.classList.add("hidden"); el.classList.remove("fade-in"); }
@@ -308,6 +408,8 @@ function resetUI() {
     if (el) el.innerHTML = "";
   });
   document.getElementById("imageStrip").innerHTML = "";
+  document.getElementById("categoryTabs").innerHTML = "";
+  document.getElementById("categoryPanels").innerHTML = "";
   STEP_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove("active","done");
